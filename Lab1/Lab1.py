@@ -19,11 +19,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 #ALGORITHM = "tf_net"
 ALGORITHM = "tf_conv"
 
-DATASET = "mnist_d"
+#DATASET = "mnist_d"
 #DATASET = "mnist_f"
 #DATASET = "cifar_10"
 #DATASET = "cifar_100_f"
-#DATASET = "cifar_100_c"
+DATASET = "cifar_100_c"
 
 if DATASET == "mnist_d":
     NUM_CLASSES = 10
@@ -69,7 +69,7 @@ def guesserClassifier(xTest):
     return np.array(ans)
 
 
-def buildTFNeuralNet(x, y, eps = 6):
+def buildTFNeuralNet(x, y, eps = 7):
 
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(),
@@ -79,7 +79,7 @@ def buildTFNeuralNet(x, y, eps = 6):
 
     loss = 'categorical_crossentropy'
     model.compile(optimizer='Adam', loss=loss)
-    model.fit(x, y, eps)
+    model.fit(x, y, epochs=eps)
 
     return model
 
@@ -100,7 +100,7 @@ def buildTFConvNet(x, y, eps = 10, dropout = True, dropRate = 0.2):
     model.add(keras.layers.Dense(128, activation="relu"))
     model.add(keras.layers.Dense(NUM_CLASSES, activation='softmax'))
     model.compile(optimizer='Adam', loss=lossType)
-    model.fit(x, y, eps)
+    model.fit(x, y, epochs=eps)
 
     return model
 
@@ -135,12 +135,11 @@ def getRawData():
 
 def preprocessData(raw):
     ((xTrain, yTrain), (xTest, yTest)) = raw
-    if ALGORITHM != "tf_conv":
-        xTrainP = xTrain.reshape((xTrain.shape[0], IS))
-        xTestP = xTest.reshape((xTest.shape[0], IS))
-    else:
-        xTrainP = xTrain.reshape((xTrain.shape[0], IH, IW, IZ))
-        xTestP = xTest.reshape((xTest.shape[0], IH, IW, IZ))
+    xTrain = xTrain / 256
+    xTest = xTest / 256
+
+    xTrainP = xTrain.reshape((xTrain.shape[0], IH, IW, IZ))
+    xTestP = xTest.reshape((xTest.shape[0], IH, IW, IZ))
     yTrainP = to_categorical(yTrain, NUM_CLASSES)
     yTestP = to_categorical(yTest, NUM_CLASSES)
     print("New shape of xTrain dataset: %s." % str(xTrainP.shape))
